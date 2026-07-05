@@ -22,5 +22,28 @@ model User {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
+  posts Post[]
+
   @@map("users")
+}
+
+model Post {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  number      String
+  publishedAt DateTime @default(now())
+  subheading  String?
+  quote       String?
+  quoteAuthor String?
+  paragraphs  String[]
+  list        String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([publishedAt])
+  @@map("posts")
 }
