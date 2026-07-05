@@ -6,6 +6,8 @@ import { z } from "zod";
 
 import { Role } from "../src/common/constants/roles";
 
+import { samplePosts } from "./sample-posts";
+
 const seedSchema = z.object({
   SEED_ADMIN_EMAIL: z.string().email().default("admin@example.com"),
   SEED_ADMIN_PASSWORD: z.string().min(8).default("change-this-admin-password"),
@@ -19,7 +21,7 @@ async function main(): Promise<void> {
   const passwordHash = await hash(env.SEED_ADMIN_PASSWORD, 12);
   const email = env.SEED_ADMIN_EMAIL.toLowerCase();
 
-  await prisma.user.upsert({
+  const admin = await prisma.user.upsert({
     where: { email },
     update: {
       name: env.SEED_ADMIN_NAME,
@@ -35,6 +37,16 @@ async function main(): Promise<void> {
   });
 
   console.log(`Seeded admin user: ${email}`);
+
+  for (const post of samplePosts) {
+    await prisma.post.upsert({
+      where: { slug: post.slug },
+      update: { ...post, authorId: admin.id },
+      create: { ...post, authorId: admin.id },
+    });
+  }
+
+  console.log(`Seeded ${samplePosts.length} sample posts`);
 }
 
 main()
