@@ -57,8 +57,9 @@ model SiteSettings {
   currentlyUsing  String[]
   otherInterests  String[]
   email           String
-  github          String
-  twitter         String
+  github          String?
+  threads         String?
+  linkedin        String?
   footerBlurb     String
   updatedAt       DateTime @updatedAt
 

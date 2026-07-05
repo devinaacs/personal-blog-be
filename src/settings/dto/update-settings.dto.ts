@@ -57,17 +57,32 @@ export class UpdateSettingsDto {
   @MaxLength(320)
   email?: string;
 
-  @ApiPropertyOptional({ example: "https://github.com/username" })
+  @ApiPropertyOptional({
+    example: "https://github.com/username",
+    nullable: true,
+  })
   @IsOptional()
   @IsUrl()
   @MaxLength(300)
-  github?: string;
+  github?: string | null;
 
-  @ApiPropertyOptional({ example: "https://twitter.com/username" })
+  @ApiPropertyOptional({
+    example: "https://www.threads.net/@username",
+    nullable: true,
+  })
   @IsOptional()
   @IsUrl()
   @MaxLength(300)
-  twitter?: string;
+  threads?: string | null;
+
+  @ApiPropertyOptional({
+    example: "https://www.linkedin.com/in/username",
+    nullable: true,
+  })
+  @IsOptional()
+  @IsUrl()
+  @MaxLength(300)
+  linkedin?: string | null;
 
   @ApiPropertyOptional({ example: "A personal journal about software..." })
   @IsOptional()

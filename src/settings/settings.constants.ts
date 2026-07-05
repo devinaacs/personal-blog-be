@@ -26,8 +26,9 @@ export const DEFAULT_SETTINGS = {
     "lo-fi beats",
   ],
   email: "hello@mail.dev",
-  github: "https://github.com/username",
-  twitter: "https://twitter.com/username",
+  github: null as string | null,
+  threads: null as string | null,
+  linkedin: null as string | null,
   footerBlurb:
     "Thoughts, code, and everything in between — a personal journal about software, writing, and the occasional 2am realization.",
 };
