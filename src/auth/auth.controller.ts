@@ -18,6 +18,7 @@ import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
 import { AuthUser } from "@/common/types/auth-user";
 
 import { AuthService } from "./auth.service";
+import { AuthResponseDto, MessageResponseDto } from "./dto/auth-response.dto";
 import { LoginDto } from "./dto/login.dto";
 import { RefreshTokenDto } from "./dto/refresh-token.dto";
 import { RegisterDto } from "./dto/register.dto";
@@ -28,21 +29,27 @@ export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
   @Post("register")
-  @ApiCreatedResponse({ description: "User registered and authenticated" })
+  @ApiCreatedResponse({
+    description: "User registered and authenticated",
+    type: AuthResponseDto,
+  })
   register(@Body() dto: RegisterDto) {
     return this.auth.register(dto);
   }
 
   @Post("login")
   @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ description: "User authenticated" })
+  @ApiOkResponse({ description: "User authenticated", type: AuthResponseDto })
   login(@Body() dto: LoginDto) {
     return this.auth.login(dto);
   }
 
   @Post("refresh")
   @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ description: "Access and refresh tokens rotated" })
+  @ApiOkResponse({
+    description: "Access and refresh tokens rotated",
+    type: AuthResponseDto,
+  })
   refresh(@Body() dto: RefreshTokenDto) {
     return this.auth.refresh(dto);
   }
@@ -51,7 +58,10 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @ApiOkResponse({ description: "Refresh token invalidated" })
+  @ApiOkResponse({
+    description: "Refresh token invalidated",
+    type: MessageResponseDto,
+  })
   logout(@CurrentUser() user: AuthUser) {
     return this.auth.logout(user);
   }

@@ -29,6 +29,10 @@ import { AuthUser } from "@/common/types/auth-user";
 import { PaginatedResult } from "@/common/types/pagination";
 
 import { CreatePostDto } from "./dto/create-post.dto";
+import {
+  PaginatedPostsResponseDto,
+  PostResponseDto,
+} from "./dto/post-response.dto";
 import { UpdatePostDto } from "./dto/update-post.dto";
 import { PostsService } from "./posts.service";
 import { PublicPost } from "./types/post-record";
@@ -39,7 +43,10 @@ export class PostsController {
   constructor(private readonly posts: PostsService) {}
 
   @Get()
-  @ApiOkResponse({ description: "Paginated published posts" })
+  @ApiOkResponse({
+    description: "Paginated published posts",
+    type: PaginatedPostsResponseDto,
+  })
   async findAll(
     @Query() query: PaginationQueryDto,
   ): Promise<PaginatedResult<PublicPost>> {
@@ -50,7 +57,10 @@ export class PostsController {
   @Roles(Role.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: "Post by id. Admin only." })
+  @ApiOkResponse({
+    description: "Post by id. Admin only.",
+    type: PostResponseDto,
+  })
   async findOneById(@Param("id") id: string): Promise<PublicPost> {
     const post = await this.posts.findById(id);
 
@@ -62,7 +72,7 @@ export class PostsController {
   }
 
   @Get(":slug")
-  @ApiOkResponse({ description: "Post by slug" })
+  @ApiOkResponse({ description: "Post by slug", type: PostResponseDto })
   async findOne(@Param("slug") slug: string): Promise<PublicPost> {
     const post = await this.posts.findBySlug(slug);
 
@@ -77,7 +87,10 @@ export class PostsController {
   @Roles(Role.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
-  @ApiCreatedResponse({ description: "Post created. Admin only." })
+  @ApiCreatedResponse({
+    description: "Post created. Admin only.",
+    type: PostResponseDto,
+  })
   async create(
     @Body() dto: CreatePostDto,
     @CurrentUser() user: AuthUser,
@@ -93,7 +106,10 @@ export class PostsController {
   @Roles(Role.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: "Post updated. Admin only." })
+  @ApiOkResponse({
+    description: "Post updated. Admin only.",
+    type: PostResponseDto,
+  })
   async update(
     @Param("id") id: string,
     @Body() dto: UpdatePostDto,

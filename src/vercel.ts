@@ -13,9 +13,13 @@ export async function createServer(): Promise<Express> {
   }
 
   const instance = express();
-  const app = await NestFactory.create(AppModule, new ExpressAdapter(instance), {
-    bufferLogs: true,
-  });
+  const app = await NestFactory.create(
+    AppModule,
+    new ExpressAdapter(instance),
+    {
+      bufferLogs: true,
+    },
+  );
 
   setupApp(app);
   await app.init();

@@ -7,6 +7,7 @@ import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
 import { RolesGuard } from "@/common/guards/roles.guard";
 
 import { UpdateSettingsDto } from "./dto/update-settings.dto";
+import { SettingsResponseDto } from "./dto/settings-response.dto";
 import { SettingsService } from "./settings.service";
 import { SettingsRecord } from "./types/settings-record";
 
@@ -16,7 +17,7 @@ export class SettingsController {
   constructor(private readonly settings: SettingsService) {}
 
   @Get()
-  @ApiOkResponse({ description: "Site settings" })
+  @ApiOkResponse({ description: "Site settings", type: SettingsResponseDto })
   async get(): Promise<SettingsRecord> {
     return this.settings.get();
   }
@@ -25,7 +26,10 @@ export class SettingsController {
   @Roles(Role.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ description: "Site settings updated. Admin only." })
+  @ApiOkResponse({
+    description: "Site settings updated. Admin only.",
+    type: SettingsResponseDto,
+  })
   async update(@Body() dto: UpdateSettingsDto): Promise<SettingsRecord> {
     return this.settings.update(dto);
   }

@@ -1,33 +1,30 @@
-# NestJS REST API Boilerplate
+# dev — Personal Blog API
 
-A production-minded NestJS REST API boilerplate for auth-backed products, dashboards, backoffices, mobile APIs, and service backends.
+The NestJS REST API behind [dev](https://devjustpost.vercel.app), a personal blog about software, writing, and the occasional 2am realization. It serves published posts, site settings, and admin auth/content management for the [frontend](https://github.com/devinaacs/personal-blog-web).
+
+Live API: <https://devjustpost-api.vercel.app>
+API docs: <https://devjustpost-api.vercel.app/docs>
 
 ## Stack
 
 - NestJS
 - TypeScript strict mode
-- Prisma
-- PostgreSQL with Docker Compose
-- JWT authentication
-- Refresh token rotation and logout invalidation
-- Role-based authorization
-- `class-validator` and global `ValidationPipe`
+- Prisma + PostgreSQL (Supabase)
+- JWT authentication with refresh token rotation and logout invalidation
+- Role-based authorization (`USER` / `ADMIN`)
+- `class-validator` and a global `ValidationPipe`
 - `ConfigModule` with Zod environment validation
 - Pino request logging
 - Helmet security headers and request throttling
-- Swagger / OpenAPI
-- ESLint
-- Prettier
-- Jest
-- E2E test setup
-- GitHub Actions CI
-- Docker, Railway, and Render deployment presets
+- Swagger / OpenAPI with typed response schemas
+- Jest unit tests
+- Deployed as a Vercel serverless function
 
 ## Getting Started
 
 ```bash
-git clone <repository-url> my-api
-cd my-api
+git clone https://github.com/devinaacs/personal-blog-be.git
+cd personal-blog-be
 cp .env.example .env
 npm install
 docker compose up -d
@@ -68,12 +65,17 @@ npm run db:seed        # Seed the admin user
 
 ```txt
 src/
-  auth/                JWT auth module, DTOs, controller, service, strategy
+  auth/                JWT auth module: register, login, refresh, logout
   common/              Shared decorators, DTOs, filters, guards, interceptors, types
   config/              Environment schema and validation
-  health/              Health check endpoint
+  health/              Health and readiness checks (used by uptime + build checks)
+  posts/               Blog post CRUD, slug generation, Swagger response DTOs
   prisma/              Prisma module and service lifecycle
-  users/               User lookup and profile endpoint
+  settings/            Singleton site settings (bio, links, footer, etc.)
+  users/               User lookup and profile endpoints
+  vercel.ts            Serverless bootstrap (no app.listen, used by api/index.js)
+api/
+  index.js             Vercel serverless function entry point
 prisma/
   schema.prisma        Database schema
 ```
@@ -86,7 +88,7 @@ Create a local environment file from the example:
 cp .env.example .env
 ```
 
-The required values are:
+Required values:
 
 ```bash
 DATABASE_URL="postgresql://postgres:postgres@localhost:15432/devc_api?schema=public"
@@ -95,6 +97,8 @@ JWT_REFRESH_SECRET="replace-with-a-different-32-characters-refresh-secret"
 ```
 
 Environment values are validated in `src/config/env.validation.ts`. The app fails fast during boot when required values are missing or malformed.
+
+In production this API runs against a Supabase Postgres instance through its connection pooler. Use the **transaction-mode** pooler (port `6543`) with `?pgbouncer=true&connection_limit=1` in `DATABASE_URL` — serverless invocations each open a fresh Prisma client, and the session-mode pooler (port `5432`) exhausts under concurrent cold starts.
 
 ## Database
 
@@ -127,16 +131,26 @@ npm run db:seed
 The default API prefix is `api/v1`.
 
 ```txt
-GET  /api/v1/health
-GET  /api/v1/health/live
-GET  /api/v1/health/ready
-POST /api/v1/auth/register
-POST /api/v1/auth/login
-POST /api/v1/auth/refresh
-POST /api/v1/auth/logout
-GET  /api/v1/users?page=1&limit=20
-GET  /api/v1/users/me
+GET    /api/v1/health
+GET    /api/v1/health/live
+GET    /api/v1/health/ready
+POST   /api/v1/auth/register
+POST   /api/v1/auth/login
+POST   /api/v1/auth/refresh
+POST   /api/v1/auth/logout
+GET    /api/v1/posts?page=1&limit=20        Published posts
+GET    /api/v1/posts/:slug                  Post by slug
+GET    /api/v1/posts/id/:id                 Post by id (admin)
+POST   /api/v1/posts                        Create post (admin)
+PATCH  /api/v1/posts/:id                    Update post (admin)
+DELETE /api/v1/posts/:id                    Delete post (admin)
+GET    /api/v1/settings                     Site settings
+PATCH  /api/v1/settings                     Update site settings (admin)
+GET    /api/v1/users?page=1&limit=20        Paginated users (admin)
+GET    /api/v1/users/me                     Authenticated user profile
 ```
+
+Full request/response schemas are documented in Swagger at `/docs`.
 
 Use the JWT returned from register or login as a bearer token:
 
@@ -177,6 +191,16 @@ Paginated endpoints return:
 
 The global response interceptor wraps this object in the standard `success/data/meta` envelope.
 
+## Testing
+
+Unit tests cover the business logic layer: services (`posts`, `users`, `settings`, `auth`), guards, the exception filter, the response interceptor, and shared utilities. Controllers stay thin (delegate to services) so they're exercised through the e2e suite instead.
+
+```bash
+npm run test        # Unit tests
+npm run test:cov     # With coverage
+npm run test:e2e     # End-to-end, against a real database
+```
+
 ## Conventions
 
 - Use Node.js 22. The repo includes `.nvmrc` for Node version managers.
@@ -186,6 +210,7 @@ The global response interceptor wraps this object in the standard `success/data/
 - Keep database access behind module services instead of querying Prisma directly from controllers.
 - Use refresh token rotation for session renewal and `POST /auth/logout` to invalidate sessions.
 - Use `@Roles(...)` plus `RolesGuard` for role-protected endpoints.
+- Document new endpoints with `@ApiOkResponse`/`@ApiCreatedResponse` and a typed response DTO, not just a description string.
 - Run `npm run check` before merging or deploying.
 
 ## Docker
@@ -204,15 +229,25 @@ docker run --env-file .env -p 3001:3001 devc-api
 
 ## Deployment
 
-The repo includes:
+This API is deployed to **Vercel** as a serverless function, alongside Docker/Railway/Render presets for a traditional long-running deployment:
 
 ```txt
+api/index.js       Serverless entry point (caches the Nest app across invocations)
+src/vercel.ts      Bootstrap that skips app.listen()
+vercel.json        Build command + rewrite-everything-to-/api routing
 Dockerfile
 railway.json
 render.yaml
 ```
 
-Recommended production flow:
+Vercel deployment notes:
+
+1. `vercel.json` runs `npm run build` (`nest build`, which resolves `@/` path aliases to relative imports) and rewrites all paths to the `api/index.js` function.
+2. `postinstall` runs `prisma generate` so the Prisma Client is available at build time.
+3. Set `DATABASE_URL`, `JWT_SECRET`, `JWT_REFRESH_SECRET`, `CORS_ORIGIN`, and the rest of `.env.example` as environment variables on the Vercel project (Production + Preview).
+4. Use the transaction-mode Supabase pooler connection string (see [Environment](#environment)) — this is the fix for intermittent 500s under concurrent cold starts.
+
+For a traditional always-on deployment instead:
 
 1. Provision managed PostgreSQL.
 2. Set `DATABASE_URL`, `JWT_SECRET`, `JWT_REFRESH_SECRET`, and `CORS_ORIGIN`.

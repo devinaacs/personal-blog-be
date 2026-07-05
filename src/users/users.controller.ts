@@ -17,6 +17,10 @@ import { RolesGuard } from "@/common/guards/roles.guard";
 import { AuthUser, PublicUser } from "@/common/types/auth-user";
 import { PaginatedResult } from "@/common/types/pagination";
 
+import {
+  PaginatedUsersResponseDto,
+  UserResponseDto,
+} from "./dto/user-response.dto";
 import { UsersService } from "./users.service";
 
 type UsersReader = {
@@ -37,7 +41,10 @@ export class UsersController {
   @Get()
   @Roles(Role.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @ApiOkResponse({ description: "Paginated users. Admin only." })
+  @ApiOkResponse({
+    description: "Paginated users. Admin only.",
+    type: PaginatedUsersResponseDto,
+  })
   async findAll(
     @Query() query: PaginationQueryDto,
   ): Promise<PaginatedResult<PublicUser>> {
@@ -47,7 +54,10 @@ export class UsersController {
   }
 
   @Get("me")
-  @ApiOkResponse({ description: "Authenticated user profile" })
+  @ApiOkResponse({
+    description: "Authenticated user profile",
+    type: UserResponseDto,
+  })
   async me(@CurrentUser() user: AuthUser): Promise<PublicUser> {
     const foundUser = await this.users.findPublicById(user.sub);
 
