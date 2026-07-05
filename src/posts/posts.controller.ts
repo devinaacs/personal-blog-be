@@ -46,6 +46,21 @@ export class PostsController {
     return this.posts.findAllPublished(query);
   }
 
+  @Get("id/:id")
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: "Post by id. Admin only." })
+  async findOneById(@Param("id") id: string): Promise<PublicPost> {
+    const post = await this.posts.findById(id);
+
+    if (!post) {
+      throw new NotFoundException("Post not found");
+    }
+
+    return post;
+  }
+
   @Get(":slug")
   @ApiOkResponse({ description: "Post by slug" })
   async findOne(@Param("slug") slug: string): Promise<PublicPost> {
