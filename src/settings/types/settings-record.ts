@@ -10,6 +10,7 @@ export type SettingsRecord = {
   github: string | null;
   threads: string | null;
   linkedin: string | null;
+  workspaceImageUrl: string | null;
   footerBlurb: string;
   updatedAt: Date;
 };

@@ -141,7 +141,8 @@ export const samplePosts: SamplePost[] = [
       "This works for more than just debugging. Stuck on a design decision? Explain it to the duck. Not sure how to structure an essay? Tell the duck about it. Can't figure out why your tests are failing? You guessed it—duck time.",
       "The best tools are often the simplest. You don't need AI-powered code completion or fancy debugging tools. Sometimes you just need to slow down and talk to a duck.",
     ],
-    quote: "If you can't explain it simply, you don't understand it well enough.",
+    quote:
+      "If you can't explain it simply, you don't understand it well enough.",
     quoteAuthor: "Albert Einstein (allegedly)",
     subheading: "Why this works",
     list: [

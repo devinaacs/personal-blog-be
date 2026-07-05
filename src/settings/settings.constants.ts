@@ -29,6 +29,9 @@ export const DEFAULT_SETTINGS = {
   github: null as string | null,
   threads: null as string | null,
   linkedin: null as string | null,
+  workspaceImageUrl:
+    "https://images.unsplash.com/photo-1495121553079-4c61bcce1894?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" as
+      string | null,
   footerBlurb:
     "Thoughts, code, and everything in between — a personal journal about software, writing, and the occasional 2am realization.",
 };

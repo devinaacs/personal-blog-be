@@ -84,6 +84,15 @@ export class UpdateSettingsDto {
   @MaxLength(300)
   linkedin?: string | null;
 
+  @ApiPropertyOptional({
+    example: "https://images.unsplash.com/photo-...",
+    nullable: true,
+  })
+  @IsOptional()
+  @IsUrl()
+  @MaxLength(500)
+  workspaceImageUrl?: string | null;
+
   @ApiPropertyOptional({ example: "A personal journal about software..." })
   @IsOptional()
   @IsString()
