@@ -61,11 +61,11 @@ type LogoutAuthService = {
 };
 
 function mockResolvedValue(mock: MockFn, value: unknown): MockFn {
-  return mock.mockResolvedValue(value as never);
+  return mock.mockResolvedValue(value);
 }
 
 function mockResolvedValueOnce(mock: MockFn, value: unknown): MockFn {
-  return mock.mockResolvedValueOnce(value as never);
+  return mock.mockResolvedValueOnce(value);
 }
 
 async function refreshToken(
@@ -163,7 +163,7 @@ describe("AuthService", () => {
         sub: user.id,
         email: user.email,
         role: user.role,
-        jti: expect.any(String) as unknown,
+        jti: expect.any(String),
       }),
       {
         expiresIn: "1d",

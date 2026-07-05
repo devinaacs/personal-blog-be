@@ -14,25 +14,25 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateUserInput): Promise<UserRecord> {
-    return this.prisma.user.create({ data }) as Promise<UserRecord>;
+    return this.prisma.user.create({ data });
   }
 
   async findByEmail(email: string): Promise<UserRecord | null> {
     return this.prisma.user.findUnique({
       where: { email },
-    }) as Promise<UserRecord | null>;
+    });
   }
 
   async findById(id: string): Promise<UserRecord | null> {
     return this.prisma.user.findUnique({
       where: { id },
-    }) as Promise<UserRecord | null>;
+    });
   }
 
   async findAll(): Promise<UserRecord[]> {
     return this.prisma.user.findMany({
       orderBy: { createdAt: "desc" },
-    }) as Promise<UserRecord[]>;
+    });
   }
 
   async findAllPublic({
@@ -47,7 +47,7 @@ export class UsersService {
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * limit,
         take: limit,
-      }) as Promise<UserRecord[]>,
+      }),
       this.prisma.user.count(),
     ]);
 
@@ -70,7 +70,7 @@ export class UsersService {
     return this.prisma.user.update({
       where: { id },
       data: { refreshTokenHash },
-    }) as Promise<UserRecord>;
+    });
   }
 
   toPublicUser(user: UserRecord): PublicUser {
