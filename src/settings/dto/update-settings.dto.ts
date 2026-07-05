@@ -13,7 +13,7 @@ import {
 } from "class-validator";
 
 export class UpdateSettingsDto {
-  @ApiPropertyOptional({ example: "devina cecilia" })
+  @ApiPropertyOptional({ example: "dev" })
   @IsOptional()
   @IsString()
   @MaxLength(80)
@@ -51,19 +51,19 @@ export class UpdateSettingsDto {
   @IsString({ each: true })
   otherInterests?: string[];
 
-  @ApiPropertyOptional({ example: "hello@devinacecilia.dev" })
+  @ApiPropertyOptional({ example: "hello@mail.dev" })
   @IsOptional()
   @IsEmail()
   @MaxLength(320)
   email?: string;
 
-  @ApiPropertyOptional({ example: "https://github.com/devinacecilia" })
+  @ApiPropertyOptional({ example: "https://github.com/username" })
   @IsOptional()
   @IsUrl()
   @MaxLength(300)
   github?: string;
 
-  @ApiPropertyOptional({ example: "https://twitter.com/devinacecilia" })
+  @ApiPropertyOptional({ example: "https://twitter.com/username" })
   @IsOptional()
   @IsUrl()
   @MaxLength(300)
