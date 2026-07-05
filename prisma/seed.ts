@@ -5,6 +5,10 @@ import { hash } from "bcryptjs";
 import { z } from "zod";
 
 import { Role } from "../src/common/constants/roles";
+import {
+  DEFAULT_SETTINGS,
+  SETTINGS_ID,
+} from "../src/settings/settings.constants";
 
 import { samplePosts } from "./sample-posts";
 
@@ -47,6 +51,14 @@ async function main(): Promise<void> {
   }
 
   console.log(`Seeded ${samplePosts.length} sample posts`);
+
+  await prisma.siteSettings.upsert({
+    where: { id: SETTINGS_ID },
+    update: {},
+    create: { id: SETTINGS_ID, ...DEFAULT_SETTINGS },
+  });
+
+  console.log("Seeded default site settings");
 }
 
 main()

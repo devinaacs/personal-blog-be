@@ -47,3 +47,20 @@ model Post {
   @@index([publishedAt])
   @@map("posts")
 }
+
+model SiteSettings {
+  id              String   @id @default(cuid())
+  siteName        String
+  tagline         String
+  establishedYear Int
+  bio             String[]
+  currentlyUsing  String[]
+  otherInterests  String[]
+  email           String
+  github          String
+  twitter         String
+  footerBlurb     String
+  updatedAt       DateTime @updatedAt
+
+  @@map("site_settings")
+}
