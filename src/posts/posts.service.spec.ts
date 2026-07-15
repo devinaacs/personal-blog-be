@@ -13,6 +13,22 @@ function mockResolvedValue(mock: MockFn, value: unknown): MockFn {
 
 const now = new Date("2026-01-03T00:00:00.000Z");
 
+const category = {
+  id: "category_1",
+  name: "Engineering",
+  slug: "engineering",
+  createdAt: now,
+  updatedAt: now,
+};
+
+const tag = {
+  id: "tag_1",
+  name: "NestJS",
+  slug: "nestjs",
+  createdAt: now,
+  updatedAt: now,
+};
+
 const post: PostRecord = {
   id: "post_1",
   slug: "the-myth-of-clean-code",
@@ -26,6 +42,9 @@ const post: PostRecord = {
   list: [],
   archived: false,
   authorId: "user_1",
+  categoryId: "category_1",
+  category,
+  tags: [tag],
   createdAt: now,
   updatedAt: now,
 };
@@ -68,15 +87,43 @@ describe("PostsService", () => {
       number: "003",
       paragraphs: ["para one"],
       authorId: "user_1",
+      categoryId: "category_1",
     });
 
     expect(prisma.post.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ slug: "the-myth-of-clean-code" }),
+        data: expect.objectContaining({
+          slug: "the-myth-of-clean-code",
+          categoryId: "category_1",
+        }),
       }),
     );
     expect(result.slug).toBe("the-myth-of-clean-code");
+    expect(result.category).toEqual(category);
+    expect(result.tags).toEqual([tag]);
     expect(result).not.toHaveProperty("authorId");
+    expect(result).not.toHaveProperty("categoryId");
+  });
+
+  it("connects tags when tagIds are provided", async () => {
+    const { service, prisma } = makeService();
+
+    await service.create({
+      title: "the myth of clean code",
+      number: "003",
+      paragraphs: ["para one"],
+      authorId: "user_1",
+      categoryId: "category_1",
+      tagIds: ["tag_1", "tag_2"],
+    });
+
+    expect(prisma.post.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          tags: { connect: [{ id: "tag_1" }, { id: "tag_2" }] },
+        }),
+      }),
+    );
   });
 
   it("appends a numeric suffix when the slug already exists", async () => {
@@ -90,6 +137,7 @@ describe("PostsService", () => {
       number: "003",
       paragraphs: ["para one"],
       authorId: "user_1",
+      categoryId: "category_1",
     });
 
     expect(prisma.post.create).toHaveBeenCalledWith(
@@ -118,16 +166,34 @@ describe("PostsService", () => {
     expect(result.pagination).toMatchObject({ page: 1, total: 1 });
   });
 
+  it("filters published posts by category and tag slug", async () => {
+    const { service, prisma } = makeService();
+
+    await service.findAllPublished({
+      page: 1,
+      limit: 20,
+      categorySlug: "engineering",
+      tagSlug: "nestjs",
+    });
+
+    expect(prisma.post.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          archived: false,
+          category: { slug: "engineering" },
+          tags: { some: { slug: "nestjs" } },
+        },
+      }),
+    );
+  });
+
   it("returns paginated posts including archived ones for admin", async () => {
     const { service, prisma } = makeService();
 
     const result = await service.findAllForAdmin({ page: 1, limit: 20 });
 
     expect(prisma.post.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ skip: 0, take: 20 }),
-    );
-    expect(prisma.post.findMany).toHaveBeenCalledWith(
-      expect.not.objectContaining({ where: expect.anything() }),
+      expect.objectContaining({ where: {}, skip: 0, take: 20 }),
     );
     expect(result.items).toHaveLength(1);
   });
@@ -141,6 +207,20 @@ describe("PostsService", () => {
       expect.objectContaining({
         where: { id: "post_1" },
         data: expect.objectContaining({ archived: true }),
+      }),
+    );
+  });
+
+  it("replaces a post's tags via update", async () => {
+    const { service, prisma } = makeService();
+
+    await service.update("post_1", { tagIds: ["tag_2"] });
+
+    expect(prisma.post.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          tags: { set: [{ id: "tag_2" }] },
+        }),
       }),
     );
   });

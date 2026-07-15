@@ -62,4 +62,15 @@ export class UpdatePostDto {
   @IsOptional()
   @IsBoolean()
   archived?: boolean;
+
+  @ApiPropertyOptional({ example: "cmr7z6zoo0004ipb9rth3ia1a" })
+  @IsOptional()
+  @IsString()
+  categoryId?: string;
+
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tagIds?: string[];
 }

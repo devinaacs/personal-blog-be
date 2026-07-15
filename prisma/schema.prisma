@@ -45,9 +45,39 @@ model Post {
   authorId String
   author   User   @relation(fields: [authorId], references: [id], onDelete: Restrict)
 
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  tags Tag[]
+
   @@index([publishedAt])
   @@index([archived])
+  @@index([categoryId])
   @@map("posts")
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  posts Post[]
+
+  @@map("categories")
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  posts Post[]
+
+  @@map("tags")
 }
 
 model SiteSettings {

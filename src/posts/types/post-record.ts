@@ -1,3 +1,6 @@
+import { CategoryRecord } from "@/categories/types/category-record";
+import { TagRecord } from "@/tags/types/tag-record";
+
 export type PostRecord = {
   id: string;
   slug: string;
@@ -11,6 +14,9 @@ export type PostRecord = {
   list: string[];
   archived: boolean;
   authorId: string;
+  categoryId: string | null;
+  category: CategoryRecord | null;
+  tags: TagRecord[];
   createdAt: Date;
   updatedAt: Date;
 };
@@ -25,6 +31,8 @@ export type CreatePostInput = {
   paragraphs: string[];
   list?: string[];
   authorId: string;
+  categoryId: string;
+  tagIds?: string[];
 };
 
 export type UpdatePostInput = Partial<
@@ -34,4 +42,4 @@ export type UpdatePostInput = Partial<
   }
 >;
 
-export type PublicPost = Omit<PostRecord, "authorId">;
+export type PublicPost = Omit<PostRecord, "authorId" | "categoryId">;

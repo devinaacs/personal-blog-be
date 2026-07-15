@@ -8,6 +8,7 @@ import {
   MaxLength,
 } from "class-validator";
 
+
 export class CreatePostDto {
   @ApiProperty({ example: "the todo app paradox" })
   @IsString()
@@ -53,4 +54,14 @@ export class CreatePostDto {
   @IsArray()
   @IsString({ each: true })
   list?: string[];
+
+  @ApiProperty({ example: "cmr7z6zoo0004ipb9rth3ia1a" })
+  @IsString()
+  categoryId!: string;
+
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tagIds?: string[];
 }

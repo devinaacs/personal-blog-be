@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
 
 import { slugify } from "@/common/utils/slugify";
 import {
@@ -13,6 +14,8 @@ import {
   PublicPost,
   UpdatePostInput,
 } from "./types/post-record";
+
+const postInclude = { category: true, tags: true } satisfies Prisma.PostInclude;
 
 @Injectable()
 export class PostsService {
@@ -33,7 +36,12 @@ export class PostsService {
         paragraphs: input.paragraphs,
         list: input.list ?? [],
         authorId: input.authorId,
+        categoryId: input.categoryId,
+        tags: input.tagIds
+          ? { connect: input.tagIds.map((id) => ({ id })) }
+          : undefined,
       },
+      include: postInclude,
     });
 
     return this.toPublicPost(post);
@@ -52,7 +60,12 @@ export class PostsService {
         paragraphs: input.paragraphs,
         list: input.list,
         archived: input.archived,
+        categoryId: input.categoryId,
+        tags: input.tagIds
+          ? { set: input.tagIds.map((id) => ({ id })) }
+          : undefined,
       },
+      include: postInclude,
     });
 
     return this.toPublicPost(post);
@@ -65,15 +78,24 @@ export class PostsService {
   async findAllPublished({
     page,
     limit,
+    categorySlug,
+    tagSlug,
   }: {
     page: number;
     limit: number;
+    categorySlug?: string;
+    tagSlug?: string;
   }): Promise<PaginatedResult<PublicPost>> {
-    const where = { archived: false };
+    const where: Prisma.PostWhereInput = {
+      archived: false,
+      ...(categorySlug ? { category: { slug: categorySlug } } : {}),
+      ...(tagSlug ? { tags: { some: { slug: tagSlug } } } : {}),
+    };
 
     const [posts, total] = await Promise.all([
       this.prisma.post.findMany({
         where,
+        include: postInclude,
         orderBy: { publishedAt: "desc" },
         skip: (page - 1) * limit,
         take: limit,
@@ -90,17 +112,28 @@ export class PostsService {
   async findAllForAdmin({
     page,
     limit,
+    categorySlug,
+    tagSlug,
   }: {
     page: number;
     limit: number;
+    categorySlug?: string;
+    tagSlug?: string;
   }): Promise<PaginatedResult<PublicPost>> {
+    const where: Prisma.PostWhereInput = {
+      ...(categorySlug ? { category: { slug: categorySlug } } : {}),
+      ...(tagSlug ? { tags: { some: { slug: tagSlug } } } : {}),
+    };
+
     const [posts, total] = await Promise.all([
       this.prisma.post.findMany({
+        where,
+        include: postInclude,
         orderBy: { publishedAt: "desc" },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.post.count(),
+      this.prisma.post.count({ where }),
     ]);
 
     return {
@@ -110,13 +143,19 @@ export class PostsService {
   }
 
   async findBySlug(slug: string): Promise<PublicPost | null> {
-    const post = await this.prisma.post.findUnique({ where: { slug } });
+    const post = await this.prisma.post.findUnique({
+      where: { slug },
+      include: postInclude,
+    });
 
     return post ? this.toPublicPost(post) : null;
   }
 
   async findById(id: string): Promise<PublicPost | null> {
-    const post = await this.prisma.post.findUnique({ where: { id } });
+    const post = await this.prisma.post.findUnique({
+      where: { id },
+      include: postInclude,
+    });
 
     return post ? this.toPublicPost(post) : null;
   }
@@ -134,6 +173,8 @@ export class PostsService {
       paragraphs: post.paragraphs,
       list: post.list,
       archived: post.archived,
+      category: post.category,
+      tags: post.tags,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
     };

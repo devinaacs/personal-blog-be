@@ -22,7 +22,6 @@ import {
 import { Role } from "@/common/constants/roles";
 import { CurrentUser } from "@/common/decorators/current-user.decorator";
 import { Roles } from "@/common/decorators/roles.decorator";
-import { PaginationQueryDto } from "@/common/dto/pagination-query.dto";
 import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
 import { RolesGuard } from "@/common/guards/roles.guard";
 import { AuthUser } from "@/common/types/auth-user";
@@ -33,6 +32,7 @@ import {
   PaginatedPostsResponseDto,
   PostResponseDto,
 } from "./dto/post-response.dto";
+import { PostsQueryDto } from "./dto/posts-query.dto";
 import { UpdatePostDto } from "./dto/update-post.dto";
 import { PostsService } from "./posts.service";
 import { PublicPost } from "./types/post-record";
@@ -48,9 +48,14 @@ export class PostsController {
     type: PaginatedPostsResponseDto,
   })
   async findAll(
-    @Query() query: PaginationQueryDto,
+    @Query() query: PostsQueryDto,
   ): Promise<PaginatedResult<PublicPost>> {
-    return this.posts.findAllPublished(query);
+    return this.posts.findAllPublished({
+      page: query.page,
+      limit: query.limit,
+      categorySlug: query.category,
+      tagSlug: query.tag,
+    });
   }
 
   @Get("id/:id")
@@ -80,9 +85,14 @@ export class PostsController {
     type: PaginatedPostsResponseDto,
   })
   async findAllForAdmin(
-    @Query() query: PaginationQueryDto,
+    @Query() query: PostsQueryDto,
   ): Promise<PaginatedResult<PublicPost>> {
-    return this.posts.findAllForAdmin(query);
+    return this.posts.findAllForAdmin({
+      page: query.page,
+      limit: query.limit,
+      categorySlug: query.category,
+      tagSlug: query.tag,
+    });
   }
 
   @Get(":slug")
