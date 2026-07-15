@@ -24,6 +24,7 @@ const post: PostRecord = {
   quoteAuthor: null,
   paragraphs: ["para one"],
   list: [],
+  archived: false,
   authorId: "user_1",
   createdAt: now,
   updatedAt: now,
@@ -98,16 +99,50 @@ describe("PostsService", () => {
     );
   });
 
-  it("returns paginated published posts", async () => {
+  it("returns paginated published posts, excluding archived ones", async () => {
     const { service, prisma } = makeService();
 
     const result = await service.findAllPublished({ page: 1, limit: 20 });
 
     expect(prisma.post.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ skip: 0, take: 20 }),
+      expect.objectContaining({
+        where: { archived: false },
+        skip: 0,
+        take: 20,
+      }),
     );
+    expect(prisma.post.count).toHaveBeenCalledWith({
+      where: { archived: false },
+    });
     expect(result.items).toHaveLength(1);
     expect(result.pagination).toMatchObject({ page: 1, total: 1 });
+  });
+
+  it("returns paginated posts including archived ones for admin", async () => {
+    const { service, prisma } = makeService();
+
+    const result = await service.findAllForAdmin({ page: 1, limit: 20 });
+
+    expect(prisma.post.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 0, take: 20 }),
+    );
+    expect(prisma.post.findMany).toHaveBeenCalledWith(
+      expect.not.objectContaining({ where: expect.anything() }),
+    );
+    expect(result.items).toHaveLength(1);
+  });
+
+  it("archives a post via update", async () => {
+    const { service, prisma } = makeService();
+
+    await service.update("post_1", { archived: true });
+
+    expect(prisma.post.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "post_1" },
+        data: expect.objectContaining({ archived: true }),
+      }),
+    );
   });
 
   it("returns null when a post is not found by slug", async () => {

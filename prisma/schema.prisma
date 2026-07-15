@@ -38,6 +38,7 @@ model Post {
   quoteAuthor String?
   paragraphs  String[]
   list        String[]
+  archived    Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -45,6 +46,7 @@ model Post {
   author   User   @relation(fields: [authorId], references: [id], onDelete: Restrict)
 
   @@index([publishedAt])
+  @@index([archived])
   @@map("posts")
 }
 

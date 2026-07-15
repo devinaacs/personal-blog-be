@@ -51,6 +51,7 @@ export class PostsService {
         quoteAuthor: input.quoteAuthor,
         paragraphs: input.paragraphs,
         list: input.list,
+        archived: input.archived,
       },
     });
 
@@ -62,6 +63,31 @@ export class PostsService {
   }
 
   async findAllPublished({
+    page,
+    limit,
+  }: {
+    page: number;
+    limit: number;
+  }): Promise<PaginatedResult<PublicPost>> {
+    const where = { archived: false };
+
+    const [posts, total] = await Promise.all([
+      this.prisma.post.findMany({
+        where,
+        orderBy: { publishedAt: "desc" },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.post.count({ where }),
+    ]);
+
+    return {
+      items: posts.map((post) => this.toPublicPost(post)),
+      pagination: createPaginationMeta({ page, limit, total }),
+    };
+  }
+
+  async findAllForAdmin({
     page,
     limit,
   }: {
@@ -107,6 +133,7 @@ export class PostsService {
       quoteAuthor: post.quoteAuthor,
       paragraphs: post.paragraphs,
       list: post.list,
+      archived: post.archived,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
     };

@@ -71,6 +71,20 @@ export class PostsController {
     return post;
   }
 
+  @Get("admin")
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({
+    description: "Paginated posts, including archived. Admin only.",
+    type: PaginatedPostsResponseDto,
+  })
+  async findAllForAdmin(
+    @Query() query: PaginationQueryDto,
+  ): Promise<PaginatedResult<PublicPost>> {
+    return this.posts.findAllForAdmin(query);
+  }
+
   @Get(":slug")
   @ApiOkResponse({ description: "Post by slug", type: PostResponseDto })
   async findOne(@Param("slug") slug: string): Promise<PublicPost> {

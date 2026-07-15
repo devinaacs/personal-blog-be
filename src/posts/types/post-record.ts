@@ -9,6 +9,7 @@ export type PostRecord = {
   quoteAuthor: string | null;
   paragraphs: string[];
   list: string[];
+  archived: boolean;
   authorId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -27,7 +28,10 @@ export type CreatePostInput = {
 };
 
 export type UpdatePostInput = Partial<
-  Omit<CreatePostInput, "authorId" | "paragraphs"> & { paragraphs: string[] }
+  Omit<CreatePostInput, "authorId" | "paragraphs"> & {
+    paragraphs: string[];
+    archived: boolean;
+  }
 >;
 
 export type PublicPost = Omit<PostRecord, "authorId">;

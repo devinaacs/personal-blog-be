@@ -2,6 +2,7 @@ import { ApiPropertyOptional } from "@nestjs/swagger";
 import {
   ArrayMinSize,
   IsArray,
+  IsBoolean,
   IsISO8601,
   IsOptional,
   IsString,
@@ -56,4 +57,9 @@ export class UpdatePostDto {
   @IsArray()
   @IsString({ each: true })
   list?: string[];
+
+  @ApiPropertyOptional({ example: false })
+  @IsOptional()
+  @IsBoolean()
+  archived?: boolean;
 }
