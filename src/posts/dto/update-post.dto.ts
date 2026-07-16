@@ -16,6 +16,15 @@ export class UpdatePostDto {
   @MaxLength(200)
   title?: string;
 
+  @ApiPropertyOptional({
+    example: "the-todo-app-paradox",
+    description: "Leave blank to auto-generate from the title",
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  slug?: string;
+
   @ApiPropertyOptional({ example: "006" })
   @IsOptional()
   @IsString()
@@ -26,6 +35,14 @@ export class UpdatePostDto {
   @IsOptional()
   @IsISO8601()
   publishedAt?: string;
+
+  @ApiPropertyOptional({
+    example: "Why finishing your to-do list isn't the point.",
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  excerpt?: string;
 
   @ApiPropertyOptional({ example: "The uncomfortable truth" })
   @IsOptional()

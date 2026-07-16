@@ -35,6 +35,7 @@ const post: PostRecord = {
   title: "the myth of clean code",
   number: "003",
   publishedAt: now,
+  excerpt: null,
   subheading: "Good enough is often good enough",
   quote: null,
   quoteAuthor: null,
@@ -126,6 +127,30 @@ describe("PostsService", () => {
     );
   });
 
+  it("uses a custom slug and excerpt when provided", async () => {
+    const { service, prisma } = makeService();
+
+    const result = await service.create({
+      title: "the myth of clean code",
+      slug: "Custom Slug!",
+      excerpt: "A short summary.",
+      number: "003",
+      paragraphs: ["para one"],
+      authorId: "user_1",
+      categoryId: "category_1",
+    });
+
+    expect(prisma.post.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          slug: "custom-slug",
+          excerpt: "A short summary.",
+        }),
+      }),
+    );
+    expect(result.excerpt).toBeNull();
+  });
+
   it("appends a numeric suffix when the slug already exists", async () => {
     const { service, prisma } = makeService();
     prisma.post.findUnique
@@ -207,6 +232,43 @@ describe("PostsService", () => {
       expect.objectContaining({
         where: { id: "post_1" },
         data: expect.objectContaining({ archived: true }),
+      }),
+    );
+  });
+
+  it("updates excerpt via update", async () => {
+    const { service, prisma } = makeService();
+
+    await service.update("post_1", { excerpt: "Updated summary." });
+
+    expect(prisma.post.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ excerpt: "Updated summary." }),
+      }),
+    );
+  });
+
+  it("renames a post's slug via update without colliding with itself", async () => {
+    const { service, prisma } = makeService();
+    prisma.post.findUnique.mockResolvedValueOnce(post);
+
+    await service.update("post_1", { slug: "New Slug" });
+
+    expect(prisma.post.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ slug: "new-slug" }),
+      }),
+    );
+  });
+
+  it("does not touch the slug when omitted from an update", async () => {
+    const { service, prisma } = makeService();
+
+    await service.update("post_1", { title: "New title" });
+
+    expect(prisma.post.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ slug: undefined }),
       }),
     );
   });

@@ -22,7 +22,12 @@ export class PostsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(input: CreatePostInput): Promise<PublicPost> {
-    const slug = await this.generateUniqueSlug(input.title);
+    let slugSeed = input.title;
+    const trimmedSlug = input.slug?.trim();
+    if (trimmedSlug) {
+      slugSeed = trimmedSlug;
+    }
+    const slug = await this.generateUniqueSlug(slugSeed);
 
     const post = await this.prisma.post.create({
       data: {
@@ -30,6 +35,7 @@ export class PostsService {
         title: input.title,
         number: input.number,
         publishedAt: input.publishedAt ?? new Date(),
+        excerpt: input.excerpt,
         subheading: input.subheading,
         quote: input.quote,
         quoteAuthor: input.quoteAuthor,
@@ -48,12 +54,19 @@ export class PostsService {
   }
 
   async update(id: string, input: UpdatePostInput): Promise<PublicPost> {
+    const trimmedSlug = input.slug?.trim();
+    const slug = trimmedSlug
+      ? await this.generateUniqueSlug(trimmedSlug, id)
+      : undefined;
+
     const post = await this.prisma.post.update({
       where: { id },
       data: {
+        slug,
         title: input.title,
         number: input.number,
         publishedAt: input.publishedAt,
+        excerpt: input.excerpt,
         subheading: input.subheading,
         quote: input.quote,
         quoteAuthor: input.quoteAuthor,
@@ -167,6 +180,7 @@ export class PostsService {
       title: post.title,
       number: post.number,
       publishedAt: post.publishedAt,
+      excerpt: post.excerpt,
       subheading: post.subheading,
       quote: post.quote,
       quoteAuthor: post.quoteAuthor,
@@ -180,17 +194,23 @@ export class PostsService {
     };
   }
 
-  private async generateUniqueSlug(title: string): Promise<string> {
-    const base = slugify(title);
+  private async generateUniqueSlug(
+    seed: string,
+    excludeId?: string,
+  ): Promise<string> {
+    const base = slugify(seed);
     let candidate = base;
     let suffix = 2;
+    let existing = await this.prisma.post.findUnique({
+      where: { slug: candidate },
+    });
 
-    while (
-      (await this.prisma.post.findUnique({ where: { slug: candidate } })) !==
-      null
-    ) {
+    while (existing !== null && existing.id !== excludeId) {
       candidate = `${base}-${suffix}`;
       suffix += 1;
+      existing = await this.prisma.post.findUnique({
+        where: { slug: candidate },
+      });
     }
 
     return candidate;

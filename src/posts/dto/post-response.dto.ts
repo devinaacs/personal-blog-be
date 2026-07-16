@@ -21,6 +21,12 @@ export class PostResponseDto {
   publishedAt!: Date;
 
   @ApiPropertyOptional({
+    example: "Why finishing your to-do list isn't the point.",
+    nullable: true,
+  })
+  excerpt!: string | null;
+
+  @ApiPropertyOptional({
     example: "Good enough is often good enough",
     nullable: true,
   })

@@ -7,6 +7,7 @@ export type PostRecord = {
   title: string;
   number: string;
   publishedAt: Date;
+  excerpt: string | null;
   subheading: string | null;
   quote: string | null;
   quoteAuthor: string | null;
@@ -23,8 +24,10 @@ export type PostRecord = {
 
 export type CreatePostInput = {
   title: string;
+  slug?: string;
   number: string;
   publishedAt?: Date;
+  excerpt?: string;
   subheading?: string;
   quote?: string;
   quoteAuthor?: string;

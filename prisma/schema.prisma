@@ -33,6 +33,7 @@ model Post {
   title       String
   number      String
   publishedAt DateTime @default(now())
+  excerpt     String?
   subheading  String?
   quote       String?
   quoteAuthor String?

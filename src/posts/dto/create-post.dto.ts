@@ -8,12 +8,20 @@ import {
   MaxLength,
 } from "class-validator";
 
-
 export class CreatePostDto {
   @ApiProperty({ example: "the todo app paradox" })
   @IsString()
   @MaxLength(200)
   title!: string;
+
+  @ApiPropertyOptional({
+    example: "the-todo-app-paradox",
+    description: "Leave blank to auto-generate from the title",
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  slug?: string;
 
   @ApiProperty({ example: "006" })
   @IsString()
@@ -24,6 +32,14 @@ export class CreatePostDto {
   @IsOptional()
   @IsISO8601()
   publishedAt?: string;
+
+  @ApiPropertyOptional({
+    example: "Why finishing your to-do list isn't the point.",
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  excerpt?: string;
 
   @ApiPropertyOptional({ example: "The uncomfortable truth" })
   @IsOptional()
