@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 
 import { slugify } from "@/common/utils/slugify";
@@ -16,6 +16,13 @@ import {
 } from "./types/post-record";
 
 const postInclude = { category: true, tags: true } satisfies Prisma.PostInclude;
+
+const postOrderBy = [
+  { pinned: "desc" },
+  { publishedAt: "desc" },
+] satisfies Prisma.PostOrderByWithRelationInput[];
+
+const MAX_PINNED_POSTS = 3;
 
 @Injectable()
 export class PostsService {
@@ -59,6 +66,18 @@ export class PostsService {
       ? await this.generateUniqueSlug(trimmedSlug, id)
       : undefined;
 
+    if (input.pinned) {
+      const pinnedCount = await this.prisma.post.count({
+        where: { pinned: true, NOT: { id } },
+      });
+
+      if (pinnedCount >= MAX_PINNED_POSTS) {
+        throw new BadRequestException(
+          `You can only pin up to ${MAX_PINNED_POSTS} posts. Unpin one first.`,
+        );
+      }
+    }
+
     const post = await this.prisma.post.update({
       where: { id },
       data: {
@@ -73,6 +92,7 @@ export class PostsService {
         paragraphs: input.paragraphs,
         list: input.list,
         archived: input.archived,
+        pinned: input.pinned,
         categoryId: input.categoryId,
         tags: input.tagIds
           ? { set: input.tagIds.map((id) => ({ id })) }
@@ -109,7 +129,7 @@ export class PostsService {
       this.prisma.post.findMany({
         where,
         include: postInclude,
-        orderBy: { publishedAt: "desc" },
+        orderBy: postOrderBy,
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -142,7 +162,7 @@ export class PostsService {
       this.prisma.post.findMany({
         where,
         include: postInclude,
-        orderBy: { publishedAt: "desc" },
+        orderBy: postOrderBy,
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -187,6 +207,7 @@ export class PostsService {
       paragraphs: post.paragraphs,
       list: post.list,
       archived: post.archived,
+      pinned: post.pinned,
       category: post.category,
       tags: post.tags,
       createdAt: post.createdAt,

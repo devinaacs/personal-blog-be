@@ -80,6 +80,14 @@ export class UpdatePostDto {
   @IsBoolean()
   archived?: boolean;
 
+  @ApiPropertyOptional({
+    example: false,
+    description: "Up to 3 posts may be pinned at once",
+  })
+  @IsOptional()
+  @IsBoolean()
+  pinned?: boolean;
+
   @ApiPropertyOptional({ example: "cmr7z6zoo0004ipb9rth3ia1a" })
   @IsOptional()
   @IsString()

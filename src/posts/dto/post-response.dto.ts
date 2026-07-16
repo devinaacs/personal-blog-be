@@ -50,6 +50,9 @@ export class PostResponseDto {
   @ApiProperty({ example: false })
   archived!: boolean;
 
+  @ApiProperty({ example: false })
+  pinned!: boolean;
+
   @ApiPropertyOptional({ type: CategoryResponseDto, nullable: true })
   category!: CategoryResponseDto | null;
 

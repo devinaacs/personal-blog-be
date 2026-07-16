@@ -1,3 +1,4 @@
+import { BadRequestException } from "@nestjs/common";
 import { describe, expect, it, jest } from "@jest/globals";
 
 import { PrismaService } from "@/prisma/prisma.service";
@@ -42,6 +43,7 @@ const post: PostRecord = {
   paragraphs: ["para one"],
   list: [],
   archived: false,
+  pinned: false,
   authorId: "user_1",
   categoryId: "category_1",
   category,
@@ -232,6 +234,57 @@ describe("PostsService", () => {
       expect.objectContaining({
         where: { id: "post_1" },
         data: expect.objectContaining({ archived: true }),
+      }),
+    );
+  });
+
+  it("pins a post via update when under the pin limit", async () => {
+    const { service, prisma } = makeService();
+    prisma.post.count.mockResolvedValueOnce(2);
+
+    await service.update("post_1", { pinned: true });
+
+    expect(prisma.post.count).toHaveBeenCalledWith({
+      where: { pinned: true, NOT: { id: "post_1" } },
+    });
+    expect(prisma.post.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ pinned: true }),
+      }),
+    );
+  });
+
+  it("rejects pinning a 4th post once the limit is reached", async () => {
+    const { service, prisma } = makeService();
+    prisma.post.count.mockResolvedValueOnce(3);
+
+    await expect(
+      service.update("post_1", { pinned: true }),
+    ).rejects.toThrow(BadRequestException);
+    expect(prisma.post.update).not.toHaveBeenCalled();
+  });
+
+  it("allows unpinning without checking the pin limit", async () => {
+    const { service, prisma } = makeService();
+
+    await service.update("post_1", { pinned: false });
+
+    expect(prisma.post.count).not.toHaveBeenCalled();
+    expect(prisma.post.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ pinned: false }),
+      }),
+    );
+  });
+
+  it("sorts pinned posts first, then by publish date", async () => {
+    const { service, prisma } = makeService();
+
+    await service.findAllPublished({ page: 1, limit: 20 });
+
+    expect(prisma.post.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderBy: [{ pinned: "desc" }, { publishedAt: "desc" }],
       }),
     );
   });

@@ -14,6 +14,7 @@ export type PostRecord = {
   paragraphs: string[];
   list: string[];
   archived: boolean;
+  pinned: boolean;
   authorId: string;
   categoryId: string | null;
   category: CategoryRecord | null;
@@ -42,6 +43,7 @@ export type UpdatePostInput = Partial<
   Omit<CreatePostInput, "authorId" | "paragraphs"> & {
     paragraphs: string[];
     archived: boolean;
+    pinned: boolean;
   }
 >;
 
