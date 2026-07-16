@@ -15,6 +15,8 @@ export type PostRecord = {
   list: string[];
   archived: boolean;
   pinned: boolean;
+  clapCount: number;
+  shareCount: number;
   authorId: string;
   categoryId: string | null;
   category: CategoryRecord | null;

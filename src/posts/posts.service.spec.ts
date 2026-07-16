@@ -44,6 +44,8 @@ const post: PostRecord = {
   list: [],
   archived: false,
   pinned: false,
+  clapCount: 0,
+  shareCount: 0,
   authorId: "user_1",
   categoryId: "category_1",
   category,

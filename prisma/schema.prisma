@@ -41,6 +41,8 @@ model Post {
   list        String[]
   archived    Boolean  @default(false)
   pinned      Boolean  @default(false)
+  clapCount   Int      @default(0)
+  shareCount  Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -50,13 +52,45 @@ model Post {
   categoryId String?
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
-  tags Tag[]
+  tags   Tag[]
+  claps  Clap[]
+  shares Share[]
 
   @@index([publishedAt])
   @@index([archived])
   @@index([pinned])
   @@index([categoryId])
   @@map("posts")
+}
+
+model Clap {
+  id        String   @id @default(cuid())
+  count     Int      @default(0)
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  postId   String
+  post     Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  readerId String
+
+  @@unique([postId, readerId])
+  @@index([postId])
+  @@map("claps")
+}
+
+model Share {
+  id        String   @id @default(cuid())
+  platform  String
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  postId   String
+  post     Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  readerId String
+
+  @@index([postId])
+  @@map("shares")
 }
 
 model Category {

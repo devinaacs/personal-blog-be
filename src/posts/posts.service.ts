@@ -208,6 +208,8 @@ export class PostsService {
       list: post.list,
       archived: post.archived,
       pinned: post.pinned,
+      clapCount: post.clapCount,
+      shareCount: post.shareCount,
       category: post.category,
       tags: post.tags,
       createdAt: post.createdAt,

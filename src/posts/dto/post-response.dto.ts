@@ -53,6 +53,12 @@ export class PostResponseDto {
   @ApiProperty({ example: false })
   pinned!: boolean;
 
+  @ApiProperty({ example: 42 })
+  clapCount!: number;
+
+  @ApiProperty({ example: 5 })
+  shareCount!: number;
+
   @ApiPropertyOptional({ type: CategoryResponseDto, nullable: true })
   category!: CategoryResponseDto | null;
 
