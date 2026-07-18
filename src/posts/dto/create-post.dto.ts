@@ -1,3 +1,4 @@
+import { Type } from "class-transformer";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import {
   ArrayMinSize,
@@ -6,7 +7,10 @@ import {
   IsOptional,
   IsString,
   MaxLength,
+  ValidateNested,
 } from "class-validator";
+
+import { ContentBlockDto } from "./content-block.dto";
 
 export class CreatePostDto {
   @ApiProperty({ example: "the todo app paradox" })
@@ -41,35 +45,12 @@ export class CreatePostDto {
   @MaxLength(300)
   excerpt?: string;
 
-  @ApiPropertyOptional({ example: "The uncomfortable truth" })
-  @IsOptional()
-  @IsString()
-  @MaxLength(200)
-  subheading?: string;
-
-  @ApiPropertyOptional({ example: "A memorable pull quote." })
-  @IsOptional()
-  @IsString()
-  @MaxLength(500)
-  quote?: string;
-
-  @ApiPropertyOptional({ example: "Someone smarter than me" })
-  @IsOptional()
-  @IsString()
-  @MaxLength(120)
-  quoteAuthor?: string;
-
-  @ApiProperty({ type: [String] })
+  @ApiProperty({ type: [ContentBlockDto] })
   @IsArray()
   @ArrayMinSize(1)
-  @IsString({ each: true })
-  paragraphs!: string[];
-
-  @ApiPropertyOptional({ type: [String] })
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  list?: string[];
+  @ValidateNested({ each: true })
+  @Type(() => ContentBlockDto)
+  content!: ContentBlockDto[];
 
   @ApiProperty({ example: "cmr7z6zoo0004ipb9rth3ia1a" })
   @IsString()

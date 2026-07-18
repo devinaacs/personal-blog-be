@@ -1,5 +1,9 @@
+import { Prisma } from "@prisma/client";
+
 import { CategoryRecord } from "@/categories/types/category-record";
 import { TagRecord } from "@/tags/types/tag-record";
+
+import { ContentBlock } from "./content-block";
 
 export type PostRecord = {
   id: string;
@@ -8,11 +12,7 @@ export type PostRecord = {
   number: string;
   publishedAt: Date;
   excerpt: string | null;
-  subheading: string | null;
-  quote: string | null;
-  quoteAuthor: string | null;
-  paragraphs: string[];
-  list: string[];
+  content: Prisma.JsonValue;
   archived: boolean;
   pinned: boolean;
   clapCount: number;
@@ -31,22 +31,22 @@ export type CreatePostInput = {
   number: string;
   publishedAt?: Date;
   excerpt?: string;
-  subheading?: string;
-  quote?: string;
-  quoteAuthor?: string;
-  paragraphs: string[];
-  list?: string[];
+  content: ContentBlock[];
   authorId: string;
   categoryId: string;
   tagIds?: string[];
 };
 
 export type UpdatePostInput = Partial<
-  Omit<CreatePostInput, "authorId" | "paragraphs"> & {
-    paragraphs: string[];
+  Omit<CreatePostInput, "authorId"> & {
     archived: boolean;
     pinned: boolean;
   }
 >;
 
-export type PublicPost = Omit<PostRecord, "authorId" | "categoryId">;
+export type PublicPost = Omit<
+  PostRecord,
+  "authorId" | "categoryId" | "content"
+> & {
+  content: ContentBlock[];
+};

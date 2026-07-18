@@ -34,11 +34,7 @@ model Post {
   number      String
   publishedAt DateTime @default(now())
   excerpt     String?
-  subheading  String?
-  quote       String?
-  quoteAuthor String?
-  paragraphs  String[]
-  list        String[]
+  content     Json
   archived    Boolean  @default(false)
   pinned      Boolean  @default(false)
   clapCount   Int      @default(0)

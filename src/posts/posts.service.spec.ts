@@ -4,7 +4,10 @@ import { describe, expect, it, jest } from "@jest/globals";
 import { PrismaService } from "@/prisma/prisma.service";
 
 import { PostsService } from "./posts.service";
+import { ContentBlock } from "./types/content-block";
 import { PostRecord } from "./types/post-record";
+
+const content: ContentBlock[] = [{ type: "paragraph", text: "para one" }];
 
 type MockFn = ReturnType<typeof jest.fn>;
 
@@ -37,11 +40,7 @@ const post: PostRecord = {
   number: "003",
   publishedAt: now,
   excerpt: null,
-  subheading: "Good enough is often good enough",
-  quote: null,
-  quoteAuthor: null,
-  paragraphs: ["para one"],
-  list: [],
+  content,
   archived: false,
   pinned: false,
   clapCount: 0,
@@ -90,7 +89,7 @@ describe("PostsService", () => {
     const result = await service.create({
       title: "the myth of clean code",
       number: "003",
-      paragraphs: ["para one"],
+      content,
       authorId: "user_1",
       categoryId: "category_1",
     });
@@ -116,7 +115,7 @@ describe("PostsService", () => {
     await service.create({
       title: "the myth of clean code",
       number: "003",
-      paragraphs: ["para one"],
+      content,
       authorId: "user_1",
       categoryId: "category_1",
       tagIds: ["tag_1", "tag_2"],
@@ -139,7 +138,7 @@ describe("PostsService", () => {
       slug: "Custom Slug!",
       excerpt: "A short summary.",
       number: "003",
-      paragraphs: ["para one"],
+      content,
       authorId: "user_1",
       categoryId: "category_1",
     });
@@ -164,7 +163,7 @@ describe("PostsService", () => {
     await service.create({
       title: "the myth of clean code",
       number: "003",
-      paragraphs: ["para one"],
+      content,
       authorId: "user_1",
       categoryId: "category_1",
     });

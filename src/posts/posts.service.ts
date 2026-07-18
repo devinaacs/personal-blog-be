@@ -8,6 +8,7 @@ import {
 } from "@/common/types/pagination";
 import { PrismaService } from "@/prisma/prisma.service";
 
+import { ContentBlock } from "./types/content-block";
 import {
   CreatePostInput,
   PostRecord,
@@ -43,11 +44,7 @@ export class PostsService {
         number: input.number,
         publishedAt: input.publishedAt ?? new Date(),
         excerpt: input.excerpt,
-        subheading: input.subheading,
-        quote: input.quote,
-        quoteAuthor: input.quoteAuthor,
-        paragraphs: input.paragraphs,
-        list: input.list ?? [],
+        content: input.content,
         authorId: input.authorId,
         categoryId: input.categoryId,
         tags: input.tagIds
@@ -86,11 +83,7 @@ export class PostsService {
         number: input.number,
         publishedAt: input.publishedAt,
         excerpt: input.excerpt,
-        subheading: input.subheading,
-        quote: input.quote,
-        quoteAuthor: input.quoteAuthor,
-        paragraphs: input.paragraphs,
-        list: input.list,
+        content: input.content,
         archived: input.archived,
         pinned: input.pinned,
         categoryId: input.categoryId,
@@ -201,11 +194,7 @@ export class PostsService {
       number: post.number,
       publishedAt: post.publishedAt,
       excerpt: post.excerpt,
-      subheading: post.subheading,
-      quote: post.quote,
-      quoteAuthor: post.quoteAuthor,
-      paragraphs: post.paragraphs,
-      list: post.list,
+      content: (post.content ?? []) as unknown as ContentBlock[],
       archived: post.archived,
       pinned: post.pinned,
       clapCount: post.clapCount,

@@ -4,6 +4,8 @@ import { CategoryResponseDto } from "@/categories/dto/category-response.dto";
 import { PaginationMetaDto } from "@/common/dto/pagination-meta.dto";
 import { TagResponseDto } from "@/tags/dto/tag-response.dto";
 
+import { ContentBlockDto } from "./content-block.dto";
+
 export class PostResponseDto {
   @ApiProperty({ example: "cmr7z6zoo0004ipb9rth3ia1a" })
   id!: string;
@@ -26,26 +28,8 @@ export class PostResponseDto {
   })
   excerpt!: string | null;
 
-  @ApiPropertyOptional({
-    example: "Good enough is often good enough",
-    nullable: true,
-  })
-  subheading!: string | null;
-
-  @ApiPropertyOptional({
-    example: "Premature optimization is the root of all evil.",
-    nullable: true,
-  })
-  quote!: string | null;
-
-  @ApiPropertyOptional({ example: "Donald Knuth", nullable: true })
-  quoteAuthor!: string | null;
-
-  @ApiProperty({ type: [String] })
-  paragraphs!: string[];
-
-  @ApiProperty({ type: [String] })
-  list!: string[];
+  @ApiProperty({ type: [ContentBlockDto] })
+  content!: ContentBlockDto[];
 
   @ApiProperty({ example: false })
   archived!: boolean;

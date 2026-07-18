@@ -35,6 +35,7 @@ import {
 import { PostsQueryDto } from "./dto/posts-query.dto";
 import { UpdatePostDto } from "./dto/update-post.dto";
 import { PostsService } from "./posts.service";
+import { ContentBlock } from "./types/content-block";
 import { PublicPost } from "./types/post-record";
 
 @ApiTags("posts")
@@ -121,6 +122,7 @@ export class PostsController {
   ): Promise<PublicPost> {
     return this.posts.create({
       ...dto,
+      content: dto.content as unknown as ContentBlock[],
       publishedAt: dto.publishedAt ? new Date(dto.publishedAt) : undefined,
       authorId: user.sub,
     });
@@ -140,6 +142,7 @@ export class PostsController {
   ): Promise<PublicPost> {
     return this.posts.update(id, {
       ...dto,
+      content: dto.content as unknown as ContentBlock[] | undefined,
       publishedAt: dto.publishedAt ? new Date(dto.publishedAt) : undefined,
     });
   }
