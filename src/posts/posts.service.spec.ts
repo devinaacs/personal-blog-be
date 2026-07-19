@@ -40,6 +40,7 @@ const post: PostRecord = {
   number: "003",
   publishedAt: now,
   excerpt: null,
+  subtitle: null,
   content,
   archived: false,
   pinned: false,

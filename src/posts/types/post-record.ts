@@ -12,6 +12,7 @@ export type PostRecord = {
   number: string;
   publishedAt: Date;
   excerpt: string | null;
+  subtitle: string | null;
   content: Prisma.JsonValue;
   archived: boolean;
   pinned: boolean;
@@ -31,6 +32,7 @@ export type CreatePostInput = {
   number: string;
   publishedAt?: Date;
   excerpt?: string;
+  subtitle?: string;
   content: ContentBlock[];
   authorId: string;
   categoryId: string;

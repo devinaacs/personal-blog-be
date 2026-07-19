@@ -45,6 +45,14 @@ export class CreatePostDto {
   @MaxLength(300)
   excerpt?: string;
 
+  @ApiPropertyOptional({
+    example: "On letting go of fairytale expectations and growing up.",
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  subtitle?: string;
+
   @ApiProperty({ type: [ContentBlockDto] })
   @IsArray()
   @ArrayMinSize(1)

@@ -34,6 +34,7 @@ model Post {
   number      String
   publishedAt DateTime @default(now())
   excerpt     String?
+  subtitle    String?
   content     Json
   archived    Boolean  @default(false)
   pinned      Boolean  @default(false)

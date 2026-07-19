@@ -28,6 +28,12 @@ export class PostResponseDto {
   })
   excerpt!: string | null;
 
+  @ApiPropertyOptional({
+    example: "On letting go of fairytale expectations and growing up.",
+    nullable: true,
+  })
+  subtitle!: string | null;
+
   @ApiProperty({ type: [ContentBlockDto] })
   content!: ContentBlockDto[];
 
